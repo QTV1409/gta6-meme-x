@@ -21,6 +21,13 @@ import { join } from 'node:path';
 const BOT_DIR = process.env.MAKEFUN_BOT_DIR ?? '/bot';
 const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
+// An X post's address, on either host X still serves posts under.
+function isXPostUrl(url: string): boolean {
+  return (
+    url.startsWith('https://x.com/') || url.startsWith('https://twitter.com/')
+  );
+}
+
 const source = join(BOT_DIR, 'POST.json');
 
 // The gate only accepts a JSON object naming an X post's address, so fail
@@ -36,8 +43,7 @@ if (
   typeof post !== 'object' ||
   post === null ||
   typeof (post as { url?: unknown }).url !== 'string' ||
-  !(post as { url: string }).url.startsWith('https://x.com/') &&
-  !(post as { url: string }).url.startsWith('https://twitter.com/')
+  !isXPostUrl((post as { url: string }).url)
 ) {
   console.error('POST.json must be {"url": "https://x.com/<handle>/status/<id>"}');
   process.exit(1);
